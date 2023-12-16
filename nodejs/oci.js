@@ -150,8 +150,7 @@ export class OCI {
 		if (this._afterCreate().includes(info.State.Status)) {
 			await start(container, retryTimes);
 			info = await container.inspect();
-			assert.ok(this._afterStart().includes(info.State.Status),
-				`should be one of [${this._afterStart()}], but got status ${info.State.Status}`);
+			assert.ok(this._afterStart().includes(info.State.Status), `should be one of [${this._afterStart()}], but got status ${info.State.Status}`);
 		}
 		return info;
 	}
@@ -331,9 +330,9 @@ export class OCIContainerOptsBuilder {
 	 * @param {boolean} tty
 	 * @returns {OCIContainerOptsBuilder}
 	 */
-	setTTY(tty){
-		this.opts.Tty = tty
-		return this
+	setTTY(tty) {
+		this.opts.Tty = tty;
+		return this;
 	}
 
 	/**
