@@ -327,6 +327,16 @@ export class OCIContainerOptsBuilder {
 	}
 
 	/**
+	 * Attach standard streams to a TTY, including stdin if it is not closed.
+	 * @param {boolean} tty
+	 * @returns {OCIContainerOptsBuilder}
+	 */
+	setTTY(tty){
+		this.opts.Tty = tty
+		return this
+	}
+
+	/**
 	 * @param {string[]} Env
 	 * @returns {OCIContainerOptsBuilder}
 	 */
