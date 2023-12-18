@@ -317,31 +317,31 @@ export class OCIContainerOptsBuilder {
 	}
 
 	/**
-	 * @param {string} name
-	 * @returns {OCIContainerOptsBuilder}
+	 *
+	 * @param {string} name The container name
 	 */
-	setName(name) {
+	set name(name) {
 		this.opts.name = name;
-		return this;
 	}
 
 	/**
 	 * Attach standard streams to a TTY, including stdin if it is not closed.
 	 * @param {boolean} tty
-	 * @returns {OCIContainerOptsBuilder}
 	 */
-	setTTY(tty) {
-		this.opts.Tty = tty;
-		return this;
+	set tty(tty) {
+		if (tty) {
+			this.opts.Tty = true;
+		} else {
+			delete this.opts.Tty;
+		}
 	}
 
 	/**
-	 * @param {string[]} Env
-	 * @returns {OCIContainerOptsBuilder}
+	 *
+	 * @param {string[]} env
 	 */
-	setEnv(Env) {
-		this.opts.Env = Env;
-		return this;
+	set env(env) {
+		this.opts.Env = env;
 	}
 
 	/**
@@ -349,7 +349,21 @@ export class OCIContainerOptsBuilder {
 	 * @returns {OCIContainerOptsBuilder}
 	 */
 	setEnvObject(env) {
-		this.opts.Env = Object.entries(env).map(([key, value]) => `${key}=${value}`);
+		this.env = Object.entries(env).map(([key, value]) => `${key}=${value}`);
+		return this;
+	}
+
+	/**
+	 *
+	 * @param {string} key
+	 * @param {string} value
+	 * @returns {OCIContainerOptsBuilder}
+	 */
+	addEnv(key, value) {
+		const newItem = `${key}=${value}`;
+		if (!this.opts.Env.includes(newItem)) {
+			this.opts.Env.push(newItem);
+		}
 		return this;
 	}
 
