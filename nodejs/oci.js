@@ -35,14 +35,6 @@ export class OCI {
 
 		this.client = new Dockerode(opts);
 		this.logger = logger;
-
-		this.prune = {
-			images: this.client.pruneImages, system: async () => {
-				await this.client.pruneContainers();
-				await this.client.pruneVolumes();
-				await this.client.pruneNetworks();
-			}
-		};
 	}
 
 	async info() {
@@ -52,6 +44,12 @@ export class OCI {
 	async ping() {
 		const result = await this.client.ping();
 		return result.toString();
+	}
+
+	async systemPrune() {
+		await this.client.pruneContainers();
+		await this.client.pruneVolumes();
+		await this.client.pruneNetworks();
 	}
 
 	/**
@@ -155,6 +153,13 @@ export class OCI {
 		return info;
 	}
 
+	async containerList({all, network, status} = {all: true}) {
+		const filters = {
+			network: network ? [network] : undefined, status: status ? [status] : undefined
+		};
+		return this.client.listContainers({all, filters});
+	}
+
 	async inflateContainerName(container_name) {
 		const containers = await this.containerList();
 		return containers.filter(container => container.Names.find(name => name.includes(container_name)));
@@ -174,6 +179,10 @@ export class OCI {
 		}
 	}
 
+	async imagePrune() {
+		await this.client.pruneImages();
+	}
+
 	async imageList(opts = {all: undefined}) {
 		return this.client.listImages(opts);
 	}
@@ -191,13 +200,6 @@ export class OCI {
 				throw err;
 			}
 		}
-	}
-
-	async containerList({all, network, status} = {all: true}) {
-		const filters = {
-			network: network ? [network] : undefined, status: status ? [status] : undefined
-		};
-		return this.client.listContainers({all, filters});
 	}
 
 	async imageDelete(imageName) {
