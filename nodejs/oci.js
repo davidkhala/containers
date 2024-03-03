@@ -422,6 +422,24 @@ export class OCIContainerOptsBuilder {
 		return this;
 	}
 
+	set healthcheck(commands) {
+
+		if (!this.opts.Healthcheck) {
+			this.opts.Healthcheck = {};
+		}
+
+		if (Array.isArray(commands)) {
+			this.opts.Healthcheck.Test = commands;
+		} else {
+			this.opts.Healthcheck.Test = ['NONE']; // disable healthcheck
+		}
+	}
+
+	// https://docs.docker.com/engine/api/v1.44/#tag/Container/operation/ContainerCreate
+	setHealthCheck(useShell, ...commands) {
+		this.healthcheck = [useShell ? 'CMD-SHELL' : 'CMD', ...commands];
+	}
+
 }
 
 
