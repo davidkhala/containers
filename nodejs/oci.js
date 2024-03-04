@@ -1,7 +1,6 @@
 import Dockerode from 'dockerode';
 import assert from 'assert';
 import {Reason, ContainerStatus} from './constants.js';
-import {sleep} from '@davidkhala/light/index.js';
 
 const {ContainerNotFound, VolumeNotFound, NetworkNotFound, ImageNotFound} = Reason;
 const {exited, running, created} = ContainerStatus;
@@ -107,16 +106,14 @@ export class OCI {
 
 	/**
 	 * @param {ContainerOpts} createOptions
-	 * @param {number} [retryTimes]
 	 * @param {boolean} [imagePullIfNotExist]
 	 */
-	async containerStart(createOptions, retryTimes = 1, imagePullIfNotExist) {
+	async containerStart(createOptions, imagePullIfNotExist) {
 		const {name: containerName, Image} = createOptions;
 		if (imagePullIfNotExist) {
 			await this.imagePullIfNotExist(Image);
 		}
-		let container = this.client.getContainer(containerName);
-		let info;
+		let container = this.client.getContainer(containerName), info;
 
 		try {
 			info = await container.inspect();
@@ -132,25 +129,29 @@ export class OCI {
 				throw err;
 			}
 		}
-		const start = async (c, retryCountDown) => {
-			try {
-				await c.start();
-			} catch (e) {
-				if (e.message.includes('port is already allocated') && e.reason === 'server error' && e.statusCode === 500 && retryCountDown > 0) {
-					await sleep(1000);
-					await start(c, retryCountDown - 1);
-				} else {
-					throw e;
-				}
-			}
-		};
-
 		if (this._afterCreate().includes(info.State.Status)) {
-			await start(container, retryTimes);
+			await container.start();
 			info = await container.inspect();
 			assert.ok(this._afterStart().includes(info.State.Status), `should be one of [${this._afterStart()}], but got status ${info.State.Status}`);
 		}
 		return info;
+	}
+
+	async containerInspect(containerName) {
+		const container = this.client.getContainer(containerName);
+		return await container.inspect();
+	}
+
+	async containerWaitForHealthy(containerName) {
+		const info = await this.containerInspect(containerName);
+		if (!OCI.isContainerHealthy(info)) {
+			return this.containerWaitForHealthy(containerName);
+		}
+		return info;
+	}
+
+	static isContainerHealthy(containerInfo) {
+		return containerInfo.State.Health?.Status === 'healthy';
 	}
 
 	async containerList({all, network, status} = {all: true}) {
@@ -264,184 +265,4 @@ export class OCI {
 		return [running];
 	}
 }
-
-
-/**
- * @typedef {Object} ContainerOpts
- * @property {string} name container name
- * @property {string[]} Env
- * @property {string} Cmd
- * @property {string} Image
- * @property {HostConfig} HostConfig
- */
-
-/**
- * @typedef {Object} HostConfig
- * @example {
- * 		Binds:[ `${hostPath}:${containerPath}` ],
- *  	PortBindings: {
- *  		'7054': [{HostPort: port.toString()}]
- *  	}
- *  }
- *
- * @property {string[]} Binds list of `${hostPath}:${containerPath}`
- * @property {PortBindings} PortBindings
- */
-
-/**
- * @typedef {Record<string, HostPort[]>} PortBindings with exposed port number in string format as key
- */
-
-/**
- * @typedef {Object} HostPort
- * @property {string} HostPort port number in string format
- */
-/**
- *
- */
-export class OCIContainerOptsBuilder {
-
-	/**
-	 *
-	 * @param {string} Image
-	 * @param {string[]} [Cmd] the default of CMD should be empty array that it can fall back to image default
-	 * @param [logger]
-	 */
-	constructor(Image, Cmd = [], logger = console) {
-		assert.ok(Array.isArray(Cmd), `Cmd should be array, but got ${Cmd}`);
-		/**
-		 * @type {ContainerOpts}
-		 */
-		this.opts = {
-			Image, Cmd, HostConfig: {}
-		};
-		this.logger = logger;
-	}
-
-	/**
-	 *
-	 * @param {string} name The container name
-	 */
-	set name(name) {
-		this.opts.name = name;
-	}
-
-	/**
-	 * Attach standard streams to a TTY, including stdin if it is not closed.
-	 * @param {boolean} tty
-	 */
-	set tty(tty) {
-		if (tty) {
-			this.opts.Tty = true;
-		} else {
-			delete this.opts.Tty;
-		}
-	}
-
-	/**
-	 *
-	 * @param {string[]} env
-	 */
-	set env(env) {
-		this.opts.Env = env;
-	}
-
-	/**
-	 * @param {object} env
-	 * @returns {OCIContainerOptsBuilder}
-	 */
-	setEnvObject(env) {
-		this.env = Object.entries(env).map(([key, value]) => `${key}=${value}`);
-		return this;
-	}
-
-	/**
-	 *
-	 * @param {string} key
-	 * @param {string} value
-	 * @returns {OCIContainerOptsBuilder}
-	 */
-	addEnv(key, value) {
-		const newItem = `${key}=${value}`;
-		if (!this.opts.Env.includes(newItem)) {
-			this.opts.Env.push(newItem);
-		}
-		return this;
-	}
-
-	/**
-	 * @param {string} localBind `8051:7051`
-	 * @returns {OCIContainerOptsBuilder}
-	 */
-	setPortBind(localBind) {
-		let HostPort, containerPort;
-		if (Number.isInteger(localBind)) {
-			localBind = localBind.toString();
-		}
-		const tokens = localBind.split(':');
-		switch (tokens.length) {
-			case 1:
-				HostPort = tokens[0];
-				containerPort = tokens[0];
-				break;
-			case 2:
-				HostPort = tokens[0];
-				containerPort = tokens[1];
-				break;
-			default:
-				assert.fail(`invalid localBind string[${localBind}], it should be like 8051:7051 or 7051`);
-		}
-
-		this.logger.info(`container:${containerPort} => localhost:${HostPort}`);
-		if (!this.opts.ExposedPorts) {
-			this.opts.ExposedPorts = {};
-		}
-
-		if (!this.opts.HostConfig.PortBindings) {
-			this.opts.HostConfig.PortBindings = {};
-		}
-		this.opts.ExposedPorts[containerPort] = {};
-		this.opts.HostConfig.PortBindings[containerPort] = [{
-			HostPort
-		}];
-
-		return this;
-	}
-
-	/**
-	 *
-	 * @param {string} volumeName or a bind-mount absolute path
-	 * @param {string} containerPath
-	 * @returns {OCIContainerOptsBuilder}
-	 */
-	setVolume(volumeName, containerPath) {
-		if (!this.opts.HostConfig.Binds) {
-			this.opts.HostConfig.Binds = [];
-		}
-		this.opts.HostConfig.Binds.push(`${volumeName}:${containerPath}`);
-		return this;
-	}
-
-	set healthcheck(commands) {
-
-		if (!this.opts.Healthcheck) {
-			this.opts.Healthcheck = {};
-		}
-
-		if (Array.isArray(commands)) {
-			this.opts.Healthcheck.Test = commands;
-		} else {
-			this.opts.Healthcheck.Test = ['NONE']; // disable healthcheck
-		}
-	}
-
-	// https://docs.docker.com/engine/api/v1.44/#tag/Container/operation/ContainerCreate
-	setHealthCheck(useShell, ...commands) {
-		this.healthcheck = [useShell ? 'CMD-SHELL' : 'CMD', ...commands];
-	}
-
-}
-
-
-
 

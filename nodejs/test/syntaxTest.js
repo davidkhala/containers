@@ -1,5 +1,5 @@
 import assert from 'assert';
-import {OCIContainerOptsBuilder} from '../oci.js';
+import {OCIContainerOptsBuilder} from '../options.js';
 
 describe('container Opts builder', () => {
 	it('constructor', () => {
