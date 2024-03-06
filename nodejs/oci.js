@@ -144,7 +144,10 @@ export class OCI {
 
 	async containerWaitForHealthy(containerName) {
 		const info = await this.containerInspect(containerName);
+		assert.ok(info.State.Health, 'health check section configuration not specified yet');
 		if (!OCI.isContainerHealthy(info)) {
+			const current = info.State.Health.Status;
+			assert.equal(current, 'starting', `expected status=starting, but got [${current}]`);
 			return this.containerWaitForHealthy(containerName);
 		}
 		return info;
