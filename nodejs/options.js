@@ -35,16 +35,16 @@ import assert from 'assert';
 export class OCIContainerOptsBuilder {
 
 	/**
-     *
-     * @param {string} Image
-     * @param {string[]} [Cmd] the default of CMD should be empty array that it can fall back to image default
-     * @param [logger]
-     */
+	 *
+	 * @param {string} Image
+	 * @param {string[]} [Cmd] the default of CMD should be empty array that it can fall back to image default
+	 * @param [logger]
+	 */
 	constructor(Image, Cmd = [], logger = console) {
 		assert.ok(Array.isArray(Cmd), `Cmd should be array, but got ${Cmd}`);
 		/**
-         * @type {ContainerOpts}
-         */
+		 * @type {ContainerOpts}
+		 */
 		this.opts = {
 			Image, Cmd, HostConfig: {}
 		};
@@ -52,17 +52,17 @@ export class OCIContainerOptsBuilder {
 	}
 
 	/**
-     *
-     * @param {string} name The container name
-     */
+	 *
+	 * @param {string} name The container name
+	 */
 	set name(name) {
 		this.opts.name = name;
 	}
 
 	/**
-     * Attach standard streams to a TTY, including stdin if it is not closed.
-     * @param {boolean} tty
-     */
+	 * Attach standard streams to a TTY, including stdin if it is not closed.
+	 * @param {boolean} tty
+	 */
 	set tty(tty) {
 		if (tty) {
 			this.opts.Tty = true;
@@ -72,28 +72,28 @@ export class OCIContainerOptsBuilder {
 	}
 
 	/**
-     *
-     * @param {string[]} env
-     */
+	 *
+	 * @param {string[]} env
+	 */
 	set env(env) {
 		this.opts.Env = env;
 	}
 
 	/**
-     * @param {object} env
-     * @returns {OCIContainerOptsBuilder}
-     */
+	 * @param {object} env
+	 * @returns {OCIContainerOptsBuilder}
+	 */
 	setEnvObject(env) {
 		this.env = Object.entries(env).map(([key, value]) => `${key}=${value}`);
 		return this;
 	}
 
 	/**
-     *
-     * @param {string} key
-     * @param {string} value
-     * @returns {OCIContainerOptsBuilder}
-     */
+	 *
+	 * @param {string} key
+	 * @param {string} value
+	 * @returns {OCIContainerOptsBuilder}
+	 */
 	addEnv(key, value) {
 		const newItem = `${key}=${value}`;
 		if (!this.opts.Env.includes(newItem)) {
@@ -103,9 +103,9 @@ export class OCIContainerOptsBuilder {
 	}
 
 	/**
-     * @param {string} localBind `8051:7051`
-     * @returns {OCIContainerOptsBuilder}
-     */
+	 * @param {string} localBind `8051:7051`
+	 * @returns {OCIContainerOptsBuilder}
+	 */
 	setPortBind(localBind) {
 		let HostPort, containerPort;
 		if (Number.isInteger(localBind)) {
@@ -142,11 +142,11 @@ export class OCIContainerOptsBuilder {
 	}
 
 	/**
-     *
-     * @param {string} volumeName or a bind-mount absolute path
-     * @param {string} containerPath
-     * @returns {OCIContainerOptsBuilder}
-     */
+	 *
+	 * @param {string} volumeName or a bind-mount absolute path
+	 * @param {string} containerPath
+	 * @returns {OCIContainerOptsBuilder}
+	 */
 	setVolume(volumeName, containerPath) {
 		if (!this.opts.HostConfig.Binds) {
 			this.opts.HostConfig.Binds = [];
@@ -168,9 +168,18 @@ export class OCIContainerOptsBuilder {
 		}
 	}
 
-	// https://docs.docker.com/engine/api/v1.44/#tag/Container/operation/ContainerCreate
-	setHealthCheck(useShell, ...commands) {
+	//
+	/**
+	 * https://docs.docker.com/engine/api/v1.44/#tag/Container/operation/ContainerCreate
+	 * @param useShell
+	 * @param commands
+	 * @param interval checks frequency in milliseconds
+	 */
+	setHealthCheck({
+		useShell, commands, interval = 1
+	}) {
 		this.healthcheck = [useShell ? 'CMD-SHELL' : 'CMD', ...commands];
+		this.opts.Healthcheck.Interval = interval * 1000000;
 	}
 
 }
