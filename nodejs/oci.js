@@ -142,12 +142,22 @@ export class OCI {
 		return await container.inspect();
 	}
 
+	/**
+	 * expected status before healthy
+	 * @abstract
+	 * @private
+	 * @return string[]
+	 */
+	_beforeHealthy() {
+		return ['starting', 'unhealthy'];
+	}
+
 	async containerWaitForHealthy(containerName) {
 		const info = await this.containerInspect(containerName);
 		assert.ok(info.State.Health, 'health check section configuration not specified yet');
 		if (!OCI.isContainerHealthy(info)) {
 			const current = info.State.Health.Status;
-			assert.equal(current, 'starting', `expected status=starting, but got [${current}]`);
+			assert.ok(this._beforeHealthy().includes(current), `expected status is either ${this._beforeHealthy()}, but got [${current}]`);
 			return this.containerWaitForHealthy(containerName);
 		}
 		return info;
