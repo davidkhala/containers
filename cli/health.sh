@@ -17,3 +17,4 @@ wait-until-healthy(){
       fi
   done
 }
+"$@"
