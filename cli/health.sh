@@ -7,10 +7,10 @@ wait-until-healthy(){
       HEALTH_STATUS=$(docker inspect --format='{{.State.Health.Status}}' "$CONTAINER_NAME")
   
       if [[ "$HEALTH_STATUS" == "healthy" ]]; then
-          echo "Container is healthy!"
+          echo "Container $CONTAINER_NAME is healthy!"
           break
       elif [[ "$HEALTH_STATUS" == "unhealthy" ]]; then
-          echo "Container is unhealthy!"
+          echo "Container $CONTAINER_NAME is unhealthy!"
           exit 1
       else
           echo "Current health status: $HEALTH_STATUS. Waiting..."
