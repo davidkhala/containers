@@ -21,7 +21,7 @@ const {exited, running, created} = ContainerStatus;
 /**
  * Open Container Initiative: OCI
  */
-export class OCI {
+export default class OCI {
 	/**
 	 *
 	 * @param {DockerodeOpts} [opts]
