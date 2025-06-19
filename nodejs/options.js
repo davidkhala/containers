@@ -32,7 +32,7 @@ import assert from 'assert';
 /**
  *
  */
-export class OCIContainerOptsBuilder {
+export default class OCIContainerOptsBuilder {
 
 	/**
 	 *

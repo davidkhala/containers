@@ -1,6 +1,6 @@
 {
   "name": "@davidkhala/container",
-  "version": "0.2.3-a",
+  "version": "0.3.0-a",
   "description": "container base utils",
   "author": {
     "name": "David Liu",
@@ -16,8 +16,7 @@
   },
   "devDependencies": {
     "mocha": "latest",
-    "@davidkhala/logger": "latest",
-    "eslint": "latest"
+    "@davidkhala/logger": "latest"
   },
   "publishConfig": {
     "access": "public"
