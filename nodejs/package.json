@@ -1,6 +1,6 @@
 {
   "name": "@davidkhala/container",
-  "version": "0.3.0-a",
+  "version": "0.3.0",
   "description": "container base utils",
   "author": {
     "name": "David Liu",
