@@ -1,4 +1,4 @@
-import Dockerode, {Container as ContainerType} from 'dockerode';
+import Dockerode from 'dockerode';
 import {Reason} from './constants.js';
 import {Writable} from 'stream'
 import Volume from "./volume.js";

@@ -1,5 +1,5 @@
 import assert from "assert";
-import {Container as ContainerType} from 'dockerode';
+import ContainerType from 'dockerode/lib/container.js';
 import {ContainerStatus, Reason} from "./constants.js";
 const {ContainerNotFound} = Reason;
 const {exited, running, created} = ContainerStatus;
