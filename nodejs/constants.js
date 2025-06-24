@@ -10,7 +10,8 @@ export const ContainerStatus = {
 	paused: 'paused',
 	exited: 'exited', // for short life image like 'hello-world'
 	dead: 'dead',
-	initialized: 'initialized', // podman alternative of 'created' for some image
+	initialized: 'initialized', // podman alternative of 'created'
+	stopped: 'stopped',// podman alternative of 'exited'
 };
 /**
  *
