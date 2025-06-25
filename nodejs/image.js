@@ -15,14 +15,13 @@ export default class Image {
         return this.client.listImages(opts);
     }
 
-    async pullIfNotExist(name) {
+    async pullIfNotExist(name, onProgressCallback) {
         const image = this.client.getImage(name);
         try {
             return [await image.inspect(), image];
         } catch (err) {
             if (err.statusCode === 404 && err.reason === ImageNotFound) {
-                this.logger.debug(err.json.message, 'pulling');
-                await this.pull(name);
+                await this.pull(name, onProgressCallback);
                 return [await image.inspect(), image];
             } else {
                 throw err;

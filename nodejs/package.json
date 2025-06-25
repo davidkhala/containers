@@ -1,6 +1,6 @@
 {
   "name": "@davidkhala/container",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "container base utils",
   "author": {
     "name": "David Liu",
@@ -11,8 +11,8 @@
     "test": "mocha test"
   },
   "dependencies": {
-    "dockerode": "latest",
-    "@davidkhala/light": "latest"
+    "@davidkhala/light": "latest",
+    "dockerode": "latest"
   },
   "devDependencies": {
     "mocha": "latest",
