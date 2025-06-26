@@ -2,6 +2,10 @@ import {Reason} from './constants.js';
 
 const {ImageNotFound} = Reason;
 export default class Image {
+    /**
+     * @param {Dockerode} client
+     * @param logger
+     */
     constructor(client, logger) {
         this.client = client;
         this.logger = logger;

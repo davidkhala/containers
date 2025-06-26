@@ -168,12 +168,11 @@ export default class OCIContainerOptsBuilder {
 		}
 	}
 
-	//
 	/**
 	 * https://docs.docker.com/engine/api/v1.44/#tag/Container/operation/ContainerCreate
-	 * @param useShell
+	 * @param {boolean} [useShell] run command with system's default shell if true, otherwise exec arguments directly
 	 * @param commands
-	 * @param interval checks frequency in milliseconds
+	 * @param [interval] checks frequency in milliseconds
 	 */
 	setHealthCheck({
 		useShell, commands, interval = 1

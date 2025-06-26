@@ -4,6 +4,10 @@ import {ContainerStatus, Reason} from "./constants.js";
 const {ContainerNotFound} = Reason;
 const {exited, running, created} = ContainerStatus;
 export default class Container {
+    /**
+     * @param {Dockerode} client
+     * @param logger
+     */
     constructor(client, logger) {
         this.client = client;
         this.logger = logger;
