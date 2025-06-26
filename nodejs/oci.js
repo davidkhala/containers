@@ -3,6 +3,7 @@ import {Reason} from './constants.js';
 import {Writable} from 'stream'
 import Volume from "./volume.js";
 import Image from './image.js'
+import Container from "./container.js";
 
 const {NetworkNotFound} = Reason;
 
