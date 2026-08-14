@@ -97,7 +97,7 @@ export default class OCI {
                     callback();
                 }
             });
-            await this.client.run(image, commands, [
+            await this.client.run(Image, Cmd, [
                 stdoutStream, stderrStream,
             ], {Tty: false});
             return [stdoutData.trim(), stderrData.trim()]
