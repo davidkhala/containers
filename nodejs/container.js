@@ -15,7 +15,6 @@ export default class Container {
 
     /**
      * expected status after container created
-     * @abstract
      * @private
      * @return string[]
      */
@@ -25,7 +24,6 @@ export default class Container {
 
     /**
      * expected status after container started
-     * @abstract
      * @private
      * @return string[]
      */
@@ -35,7 +33,6 @@ export default class Container {
 
     /**
      * expected status before killing container
-     * @abstract
      * @private
      * @return string[]
      */
@@ -45,7 +42,6 @@ export default class Container {
 
     /**
      * expected status before healthy
-     * @abstract
      * @private
      * @return string[]
      */
